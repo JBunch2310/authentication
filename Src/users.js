@@ -84,7 +84,22 @@ exports.loginUser = (req, res) => {
       }))
 }
 
-exports.getUsers = (req, res) => {//TODO: Protect this with JTW
+exports.getUsers = (req, res) => {
+  if(!req.headers.authorization)
+  return res.status(403).send({
+    success: false,
+    message: 'No authorization token found'
+  })
+
+  //TODO: Protect this with JTW
+const decode= jwt.verify(token, 'doNotShareYourSecret')
+console.log("NEW REQUEST BY:", decode.email)
+if(decode.userRole > 5) {
+  return res.status(401).send({
+    success: false,
+    message: "Not authorized"
+  })
+}
 const db = connectDb()
 db.collection('users').get()
 .then(snapshot => {
